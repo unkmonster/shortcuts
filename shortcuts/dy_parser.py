@@ -29,10 +29,11 @@ def get_photo_url_from_card_body_row(card: Tag) -> list[str]:
     tags = card.find_all('img')
     return [t['src'] for t in tags]
 
-@retry(retry=httpx_retries(), wait=wait_exponential(multiplier=0.1, max=5))
+@retry(retry=httpx_retries(), wait=wait_exponential(multiplier=0.1), stop=stop_after_attempt(5), reraise=True)
 def parse_url(url: str):
     if not len(url):
         raise ParsingError('Empty input', url)
+    
     resp = httpx.get(
         'https://www.dlpanda.com/',
         params={
